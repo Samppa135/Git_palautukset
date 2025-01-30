@@ -34,22 +34,58 @@ class Nuoli
         double varsiHinta = VarrenPituus * 0.05;
         return karkiHinta + peraHinta + varsiHinta;
     }
+
+    public static Nuoli LuoEliittiNuoli()
+    {
+        return new Nuoli(Karki.Timantti, Pera.Kotkansulka, 100);
+    }
+
+    public static Nuoli LuoAloittelijanuoli()
+    {
+        return new Nuoli(Karki.Puu, Pera.Kanansulka, 70);
+    }
+
+    public static Nuoli LuoPerusNuoli()
+    {
+        return new Nuoli(Karki.Teräs, Pera.Kanansulka, 85);
+    }
 }
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Mikäs kärki laitetaan (1: Puu, 2: Teräs, 3: Timantti):");
-        Karki valittuKarki = ValitseKarki();
+        Console.WriteLine("Kiva nähdä sinua taas seikkailija.");
+        Console.WriteLine("Mites, haluatko:\n1. Valita itse osat?\n2. Ostaa valmiin nuolen?");
+        int valinta = int.Parse(Console.ReadLine());
 
-        Console.WriteLine("Mikäs perä laitetaan (1: Lehti, 2: Kanansulka, 3: Kotkansulka):");
-        Pera valittuPera = ValitsePera();
+        Nuoli nuoli;
+        if (valinta == 2)
+        {
+            Console.WriteLine("Valitse valmis nuoli:\n1. Eliittinuoli\n2. Aloittelijanuoli\n3. Perusnuoli");
+            int valmisValinta = int.Parse(Console.ReadLine());
+            nuoli = valmisValinta switch
+            {
+                1 => Nuoli.LuoEliittiNuoli(),
+                2 => Nuoli.LuoAloittelijanuoli(),
+                3 => Nuoli.LuoPerusNuoli(),
+                _ => Nuoli.LuoPerusNuoli()
+            };
+        }
+        else
+        {
+            Console.WriteLine("Mikäs kärki laitetaan (1: Puu, 2: Teräs, 3: Timantti):");
+            Karki valittuKarki = ValitseKarki();
 
-        Console.WriteLine("Minkä pituinen varsi laitetaan (60-100 cm):");
-        int varrenPituus = ValitsePituus();
+            Console.WriteLine("Mikäs perä laitetaan (1: Lehti, 2: Kanansulka, 3: Kotkansulka):");
+            Pera valittuPera = ValitsePera();
 
-        Nuoli nuoli = new Nuoli(valittuKarki, valittuPera, varrenPituus);
+            Console.WriteLine("Minkä pituinen varsi laitetaan (60-100 cm):");
+            int varrenPituus = ValitsePituus();
+
+            nuoli = new Nuoli(valittuKarki, valittuPera, varrenPituus);
+        }
+
         Console.WriteLine($"Se tekisi: {nuoli.PalautaHinta():0.00} kultaa");
     }
 
