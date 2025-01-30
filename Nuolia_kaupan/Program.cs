@@ -16,22 +16,37 @@ enum Pera
 
 class Nuoli
 {
-    public Karki NuolenKarki { get; set; }
-    public Pera NuolenPera { get; set; }
-    public int VarrenPituus { get; set; }
+    private Karki nuolenKarki;
+    private Pera nuolenPera;
+    private int varrenPituus;
 
     public Nuoli(Karki karki, Pera pera, int varrenPituus)
     {
-        NuolenKarki = karki;
-        NuolenPera = pera;
-        VarrenPituus = varrenPituus;
+        this.nuolenKarki = karki;
+        this.nuolenPera = pera;
+        this.varrenPituus = varrenPituus;
+    }
+
+    public Karki GetNuolenKarki()
+    {
+        return nuolenKarki;
+    }
+
+    public Pera GetNuolenPera()
+    {
+        return nuolenPera;
+    }
+
+    public int GetVarrenPituus()
+    {
+        return varrenPituus;
     }
 
     public double PalautaHinta()
     {
-        double karkiHinta = (int)NuolenKarki;
-        double peraHinta = (int)NuolenPera;
-        double varsiHinta = VarrenPituus * 0.05;
+        double karkiHinta = (int)nuolenKarki;
+        double peraHinta = (int)nuolenPera;
+        double varsiHinta = varrenPituus * 0.05;
         return karkiHinta + peraHinta + varsiHinta;
     }
 }
@@ -88,4 +103,3 @@ class Program
         return pituus;
     }
 }
-
