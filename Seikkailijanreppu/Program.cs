@@ -11,15 +11,46 @@ abstract class Tavara
         Paino = paino;
         Tilavuus = tilavuus;
     }
+
+    
+    public abstract override string ToString();
 }
 
-// Tavarat
-class Nuoli : Tavara { public Nuoli() : base(0.1, 0.05) { } }
-class Jousi : Tavara { public Jousi() : base(1, 4) { } }
-class Köysi : Tavara { public Köysi() : base(1, 1.5) { } }
-class Vesi : Tavara { public Vesi() : base(2, 2) { } }
-class RuokaAnnos : Tavara { public RuokaAnnos() : base(1, 0.5) { } }
-class Miekka : Tavara { public Miekka() : base(5, 3) { } }
+class Nuoli : Tavara
+{
+    public Nuoli() : base(0.1, 0.05) { }
+    public override string ToString() => "Nuoli";
+}
+
+class Jousi : Tavara
+{
+    public Jousi() : base(1, 4) { }
+    public override string ToString() => "Jousi";
+}
+
+class Köysi : Tavara
+{
+    public Köysi() : base(1, 1.5) { }
+    public override string ToString() => "Köysi";
+}
+
+class Vesi : Tavara
+{
+    public Vesi() : base(2, 2) { }
+    public override string ToString() => "Vesi";
+}
+
+class RuokaAnnos : Tavara
+{
+    public RuokaAnnos() : base(1, 0.5) { }
+    public override string ToString() => "Ruoka-annos";
+}
+
+class Miekka : Tavara
+{
+    public Miekka() : base(5, 3) { }
+    public override string ToString() => "Miekka";
+}
 
 // Reppu-luokka
 class Reppu
@@ -63,6 +94,22 @@ class Reppu
         nykyinenTilavuus += tavara.Tilavuus;
         return true;
     }
+
+    // Repun sisältö
+    public override string ToString()
+    {
+        if (nykyinenMaara == 0)
+            return "Tulit ostamaan kylän torilta asioita seikkailuusi.";
+
+        string sisalto = "Reppun sisältö: ";
+        for (int i = 0; i < nykyinenMaara; i++)
+        {
+            sisalto += tavarat[i].ToString();
+            if (i < nykyinenMaara - 1)
+                sisalto += ", ";
+        }
+        return sisalto;
+    }
 }
 
 // Pääohjelma
@@ -72,6 +119,9 @@ class Program
     {
         Reppu reppu = new Reppu(10, 15, 10);
 
+        // Tulostetaan repun alkuperäinen sisältö
+        Console.WriteLine("Tarina: " + reppu.ToString());
+
         while (true)
         {
             Console.WriteLine("\nRepun tila:");
@@ -79,7 +129,7 @@ class Program
             Console.WriteLine($"Paino: {reppu.NykyinenPaino}/{reppu.MaksimiPaino}");
             Console.WriteLine($"Tilavuus: {reppu.NykyinenTilavuus}/{reppu.MaksimiTilavuus}\n");
 
-            Console.WriteLine("Mitäs haluaisit lisätä?");
+            Console.WriteLine("Mitäs haluaisit ostaa?");
             Console.WriteLine("1. Nuoli");
             Console.WriteLine("2. Jousi");
             Console.WriteLine("3. Köysi");
@@ -110,12 +160,15 @@ class Program
 
             if (reppu.Lisää(lisättävä))
             {
-                Console.WriteLine("Tavara on lisätty reppuusi!");
+                Console.WriteLine("Tavara on lisätty reppuusi seikkailija!");
             }
             else
             {
                 Console.WriteLine("Tavaran lisääminen epäonnistui. Ei tarpeeksi tilaa tai painoraja ylittyi.");
             }
+
+            // Tulostetaan repun sisältö jokaisen tavaran lisäämisen jälkeen
+            Console.WriteLine("Repun sisältö: " + reppu.ToString());
         }
     }
 }
