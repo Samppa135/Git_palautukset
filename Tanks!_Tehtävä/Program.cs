@@ -1,120 +1,121 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Raylib_cs;
 
-class Program
+class TankGame
 {
+    static int screenWidth = 800;
+    static int screenHeight = 600;
+    static Tank player1 = new Tank(new Vector2(100, 300), Color.Red, KeyboardKey.W, KeyboardKey.S, KeyboardKey.A, KeyboardKey.D, KeyboardKey.Space);
+    static Tank player2 = new Tank(new Vector2(700, 300), Color.Blue, KeyboardKey.Up, KeyboardKey.Down, KeyboardKey.Left, KeyboardKey.Right, KeyboardKey.Enter);
+    static List<Bullet> bullets = new List<Bullet>();
+    static int player1Score = 0;
+    static int player2Score = 0;
+
     static void Main()
     {
-        const int screenWidth = 800;
-        const int screenHeight = 600;
-        Raylib.InitWindow(screenWidth, screenHeight, "Tanks Game");
+        Raylib.InitWindow(screenWidth, screenHeight, "Tanks");
         Raylib.SetTargetFPS(60);
-
-        Tank player1 = new Tank(100, 250, Raylib_cs.Color.Blue, KeyboardKey.KEY_W, KeyboardKey.KEY_S, KeyboardKey.KEY_A, KeyboardKey.KEY_D, KeyboardKey.KEY_SPACE);
-        Tank player2 = new Tank(600, 250, Raylib_cs.Color.Red, KeyboardKey.KEY_UP, KeyboardKey.KEY_DOWN, KeyboardKey.KEY_LEFT, KeyboardKey.KEY_RIGHT, KeyboardKey.KEY_ENTER);
-        List<Bullet> bullets = new List<Bullet>();
 
         while (!Raylib.WindowShouldClose())
         {
-            // Päivitä tankkien liike
-            player1.Update(bullets);
-            player2.Update(bullets);
+            float time = Raylib.GetTime();
+            player1.Update(time, bullets);
+            player2.Update(time, bullets);
+            UpdateBullets();
 
-            // Ammusten päivittäminen
-            foreach (var bullet in bullets)
-            {
-                bullet.Update();
-            }
-
-            // Poistetaan ruudun ulkopuolelle menneet ammukset
-            bullets.RemoveAll(b => !b.IsActive);
-
-            // Piirrä peli
             Raylib.BeginDrawing();
-            Raylib.ClearBackground(Raylib_cs.Color.Green);
+            Raylib.ClearBackground(Color.White);
 
-            // Piirrä kentän seinät
-            Raylib.DrawRectangle(300, 100, 50, 400, Raylib_cs.Color.Red);
-            Raylib.DrawRectangle(450, 100, 50, 400, Raylib_cs.Color.Red);
-
-            // Piirrä tankit ja ammukset
+            Raylib.DrawText($"Player 1: {player1Score}", 10, 10, 20, Color.Red);
+            Raylib.DrawText($"Player 2: {player2Score}", screenWidth - 150, 10, 20, Color.Blue);
             player1.Draw();
             player2.Draw();
-            foreach (var bullet in bullets)
-            {
-                bullet.Draw();
-            }
+            foreach (var bullet in bullets) bullet.Draw();
 
             Raylib.EndDrawing();
         }
-
         Raylib.CloseWindow();
+    }
+
+    static void UpdateBullets()
+    {
+        for (int i = bullets.Count - 1; i >= 0; i--)
+        {
+            bullets[i].Update();
+            if (bullets[i].OutOfBounds(screenWidth, screenHeight)) bullets.RemoveAt(i);
+        }
     }
 }
 
 class Tank
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public Color Color { get; set; }
-    public int Speed = 4;
-    public int Direction = 1;
+    public Vector2 Position;
+    public Vector2 Direction;
+    public Color TankColor;
+    private float lastShotTime;
+    private const float speed = 2.0f;
     private KeyboardKey up, down, left, right, shoot;
 
-    public Tank(int x, int y, Color color, KeyboardKey up, KeyboardKey down, KeyboardKey left, KeyboardKey right, KeyboardKey shoot)
+    public Tank(Vector2 position, Color color, KeyboardKey up, KeyboardKey down, KeyboardKey left, KeyboardKey right, KeyboardKey shoot)
     {
-        X = x;
-        Y = y;
-        Color = color;
-        this.up = up;
-        this.down = down;
-        this.left = left;
-        this.right = right;
-        this.shoot = shoot;
+        Position = position;
+        TankColor = color;
+        Direction = new Vector2(1, 0);
+        this.up = up; this.down = down; this.left = left; this.right = right; this.shoot = shoot;
     }
 
-    public void Update(List<Bullet> bullets)
+    public void Update(float time, List<Bullet> bullets)
     {
-        if (Raylib.IsKeyDown(up)) Y -= Speed;
-        if (Raylib.IsKeyDown(down)) Y += Speed;
-        if (Raylib.IsKeyDown(left)) { X -= Speed; Direction = -1; }
-        if (Raylib.IsKeyDown(right)) { X += Speed; Direction = 1; }
-        if (Raylib.IsKeyPressed(shoot)) bullets.Add(new Bullet(X + 20, Y + 15, Direction));
+        if (Raylib.IsKeyDown(up)) Position.Y -= speed;
+        if (Raylib.IsKeyDown(down)) Position.Y += speed;
+        if (Raylib.IsKeyDown(left)) { Position.X -= speed; Direction = new Vector2(-1, 0); }
+        if (Raylib.IsKeyDown(right)) { Position.X += speed; Direction = new Vector2(1, 0); }
+
+        Position.X = Math.Clamp(Position.X, 0, 760);
+        Position.Y = Math.Clamp(Position.Y, 0, 560);
+
+        if (Raylib.IsKeyPressed(shoot) && time - lastShotTime > 1.0f)
+        {
+            bullets.Add(new Bullet(Position + Direction * 20, Direction, TankColor));
+            lastShotTime = time;
+        }
     }
 
     public void Draw()
     {
-        Raylib.DrawRectangle(X, Y, 40, 40, Color);
-        Raylib.DrawRectangle(X - 5, Y, 10, 40, Raylib_cs.Color.DarkBlue);
-        Raylib.DrawRectangle(X + 35, Y, 10, 40, Raylib_cs.Color.DarkBlue);
-        Raylib.DrawRectangle(X + 15, Y - 10, 10, 20, Raylib_cs.Color.Black);
+        Raylib.DrawRectangle((int)Position.X, (int)Position.Y, 40, 40, TankColor);
+        Raylib.DrawLine((int)Position.X + 20, (int)Position.Y + 20, (int)(Position.X + Direction.X * 30), (int)(Position.Y + Direction.Y * 30), Color.BLACK);
     }
 }
 
 class Bullet
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Speed { get; set; }
-    public bool IsActive { get; set; } = true;
+    public Vector2 Position;
+    public Vector2 Direction;
+    private const float speed = 5.0f;
+    private Color BulletColor;
 
-    public Bullet(int x, int y, int direction)
+    public Bullet(Vector2 position, Vector2 direction, Color color)
     {
-        X = x;
-        Y = y;
-        Speed = 8 * direction;
+        Position = position;
+        Direction = direction;
+        BulletColor = color;
     }
 
     public void Update()
     {
-        X += Speed;
-        if (X > 800 || X < 0) IsActive = false;
+        Position += Direction * speed;
+    }
+
+    public bool OutOfBounds(int width, int height)
+    {
+        return Position.X < 0 || Position.X > width || Position.Y < 0 || Position.Y > height;
     }
 
     public void Draw()
     {
-        if (IsActive)
-            Raylib.DrawRectangle(X, Y, 10, 5, Color.Black);
+        Raylib.DrawCircle((int)Position.X, (int)Position.Y, 5, BulletColor);
     }
 }
