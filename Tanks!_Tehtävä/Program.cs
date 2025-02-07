@@ -86,7 +86,7 @@ class Tank
     public void Draw()
     {
         Raylib.DrawRectangle((int)Position.X, (int)Position.Y, 40, 40, TankColor);
-        Raylib.DrawLine((int)Position.X + 20, (int)Position.Y + 20, (int)(Position.X + Direction.X * 30), (int)(Position.Y + Direction.Y * 30), Color.BLACK);
+        Raylib.DrawLine((int)Position.X + 20, (int)Position.Y + 20, (int)(Position.X + Direction.X * 30), (int)(Position.Y + Direction.Y * 30), Color.Black);
     }
 }
 
