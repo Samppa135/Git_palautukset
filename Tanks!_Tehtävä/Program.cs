@@ -29,7 +29,7 @@ class TankGame
             UpdateBullets();  // Päivitetään ammukset
 
             Raylib.BeginDrawing();  // Alustetaan piirto
-            Raylib.ClearBackground(Color.White);  // Taustaväri
+            Raylib.ClearBackground(Color.Green);  // Taustaväri
 
             // Näytetään pisteet
             Raylib.DrawText("Player 1: " + score1, 10, 10, 20, Color.Red);  // Pelaaja 1:n pisteet
@@ -38,7 +38,7 @@ class TankGame
             player1.Draw();  // Piirretään pelaaja 1
             player2.Draw();  // Piirretään pelaaja 2
             foreach (var bullet in bullets) bullet.Draw();  // Piirretään kaikki ammukset
-            Raylib.DrawRectangleRec(wall, Color.Gray);  // Piirretään seinä
+            Raylib.DrawRectangleRec(wall, Color.Brown);  // Piirretään seinä
 
             Raylib.EndDrawing();  // Lopetetaan piirto
         }
