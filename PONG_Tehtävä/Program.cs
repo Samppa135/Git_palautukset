@@ -3,85 +3,62 @@ using System.Numerics;
 
 class Pong
 {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    // static == luokkamuuttuja
+    public static int ScreenWidth = 800;
+    public static int ScreenHeight = 450;
 
-    static void Main()
+    static void Main(string[] args)
     {
-        Raylib.InitWindow(screenWidth, screenHeight, "Pong");
+        Raylib.InitWindow(ScreenWidth, ScreenHeight, "Pong");
         Raylib.SetTargetFPS(60);
 
-        // Pelaajien asetukset
-        float paddleSpeed = 5.0f;
-        Vector2 paddleSize = new Vector2(20, 100);
+        // p1 is on the left side
+        Player p1 = new Player {
+            UpKey = KeyboardKey.W,
+            DownKey = KeyboardKey.S
+        };
+        p1.SetPaddleX(50);
 
-        // Pelaajat
-        Rectangle player1 = new Rectangle(50, screenHeight / 2 - paddleSize.Y / 2, paddleSize.X, paddleSize.Y);
-        Rectangle player2 = new Rectangle(screenWidth - 50 - paddleSize.X, screenHeight / 2 - paddleSize.Y / 2, paddleSize.X, paddleSize.Y);
+        // p2 is on the right side
+        Player p2 = new Player
+        {
+            UpKey = KeyboardKey.Up,
+            DownKey = KeyboardKey.Down
+        };
+        p2.SetPaddleX(ScreenWidth - 50);
 
-        // Pisteet
-        int player1Score = 0;
-        int player2Score = 0;
-
-        // Pallo
-        Vector2 ballPosition = new Vector2(screenWidth / 2, screenHeight / 2);
-        Vector2 ballSpeed = new Vector2(4.0f, 4.0f);
-        float ballSize = 10.0f;
+        // pallo
+        Ball ball = new Ball { Size = 15.0f};
 
         while (!Raylib.WindowShouldClose())
         {
-            if (Raylib.IsKeyDown(KeyboardKey.W) && player1.Y > 0)
-                player1.Y -= paddleSpeed;
-
-            if (Raylib.IsKeyDown(KeyboardKey.S) && player1.Y < screenHeight - paddleSize.Y)
-                player1.Y += paddleSpeed;
-
-            if (Raylib.IsKeyDown(KeyboardKey.Up))
-                player2.Y -= paddleSpeed;
-
-            if (Raylib.IsKeyDown(KeyboardKey.Down))
-                player2.Y += paddleSpeed;
+            p1.MoveMaybe();
+            p2.MoveMaybe();
 
             // Pallon liikkuminen
-            ballPosition.X += ballSpeed.X;
-            ballPosition.Y += ballSpeed.Y;
+            ball.Move();
 
             // Osuminen mailoihin
-            if (Raylib.CheckCollisionCircleRec(ballPosition, ballSize, player1) ||
-                Raylib.CheckCollisionCircleRec(ballPosition, ballSize, player2))
+            if (Collisions.Hit(ball, p1) || Collisions.Hit(ball, p2))
             {
-                ballSpeed.X *= -1;
+                ball.BounceX();
+            }
+            // Check if ball is on the left of p1 paddle position
+            else if (ball.Position.X < p1.Paddle.Position.X)
+            {
+                // opponent gets a point
+                p2.Score++;
+                ball.Reset();
+            }
+            // Check if ball is on the right of p2 paddle position
+            else if (ball.Position.X > p2.Paddle.Position.X)
+            {
+                // opponent gets a point
+                p1.Score++;
+                ball.Reset();
             }
 
-            // Osuminen seiniin
-            if (ballPosition.Y <= 0 || ballPosition.Y >= screenHeight) ballSpeed.Y *= -1;
-
-            // Pisteiden lasku
-            if (ballPosition.X <= 0)
-            {
-                player2Score++;
-                ballPosition = new Vector2(screenWidth / 2, screenHeight / 2);
-                ballSpeed.X *= -1;
-            }
-            if (ballPosition.X >= screenWidth)
-            {
-                player1Score++;
-                ballPosition = new Vector2(screenWidth / 2, screenHeight / 2);
-                ballSpeed.X *= -1;
-            }
-
-            // Piirtäminen
-            Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.Black);
-
-            Raylib.DrawRectangleRec(player1, Color.White);
-            Raylib.DrawRectangleRec(player2, Color.White);
-            Raylib.DrawCircleV(ballPosition, ballSize, Color.White);
-
-            Raylib.DrawText(player1Score.ToString(), screenWidth / 4, 20, 40, Color.White);
-            Raylib.DrawText(player2Score.ToString(), 3 * screenWidth / 4, 20, 40, Color.White);
-
-            Raylib.EndDrawing();
+            GameHelper.Draw(ball, p1, p2);
         }
 
         Raylib.CloseWindow();
