@@ -91,7 +91,7 @@ class Program
         // Käyttäjän komennot ja syötteet taulokkoon
         for (int i = 0; i < 3; i++)
         {
-            Console.WriteLine("Syötä käsky (Käynnistä, Sammuta, Ylös, Alas, Vasen, Oikea): ");
+            Console.WriteLine("Syötä käsky isolla alkukirjaimella (Käynnistä, Sammuta, Ylös, Alas, Vasen, Oikea): ");
             string syote = Console.ReadLine();
 
             switch (syote)
